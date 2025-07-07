@@ -15,22 +15,34 @@ import com.texthip.thip.ui.group.myroom.mock.GroupCardData
 import com.texthip.thip.ui.theme.ThipTheme
 import com.texthip.thip.ui.theme.ThipTheme.colors
 
+/**
+ * Displays a horizontally scrollable pager of group cards with dynamic sizing and spacing.
+ *
+ * Each card scales and changes opacity based on its selection state, and a pager indicator shows the current page.
+ *
+ * @param groupCards The list of group card data to display in the pager.
+ * @param onCardClick Callback invoked when a group card is clicked.
+ */
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 fun GroupPager(
     groupCards: List<GroupCardData>,
     onCardClick: (GroupCardData) -> Unit
 ) {
-    val cardWidth = 320.dp
-    val pageSpacing = 6.dp
+    val scale = 0.86f
+    val desiredGap = 10.dp
 
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxWidth()
             .height(192.dp)
     ) {
-        val screenWidth = maxWidth
-        val horizontalPadding = ((screenWidth - cardWidth) / 2).coerceAtLeast(0.dp)
+        val horizontalPadding = 30.dp
+        val cardWidth = maxWidth - (horizontalPadding * 2)
+
+        val pageSpacing = with(this) {
+            (-(cardWidth - (cardWidth * scale)) / 2f) + desiredGap
+        }
 
         val pagerState = rememberPagerState(
             initialPage = 0,

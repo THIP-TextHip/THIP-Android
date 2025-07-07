@@ -39,6 +39,15 @@ import com.texthip.thip.ui.theme.ThipTheme
 import com.texthip.thip.ui.theme.ThipTheme.colors
 import com.texthip.thip.ui.theme.ThipTheme.typography
 
+/**
+ * Displays a card representing a group reading room with book cover, title, participant count, user nickname, and progress.
+ *
+ * The card features a linear gradient background, rounded corners, and is fully clickable. It visually presents group details and a progress bar indicating the user's reading completion percentage.
+ *
+ * @param data The group card data containing title, image resource, participant count, nickname, and progress.
+ * @param backgroundColor The background color of the card. Defaults to white.
+ * @param onClick Callback invoked when the card is clicked.
+ */
 @Composable
 fun GroupMainCard(
     data: GroupCardData,
@@ -57,7 +66,7 @@ fun GroupMainCard(
 
     Card(
         modifier = Modifier
-            .width(320.dp)
+            .fillMaxWidth()
             .height(176.dp)
             .clickable { onClick() },
         shape = RoundedCornerShape(18.dp),

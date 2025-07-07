@@ -33,6 +33,11 @@ import com.texthip.thip.ui.theme.ThipTheme
 import com.texthip.thip.ui.theme.ThipTheme.colors
 
 
+/**
+ * Displays the main group screen with sections for the user's groups and groups nearing their deadlines.
+ *
+ * Presents a vertically scrollable layout including a top app bar, search field, "My Groups" section, group cards, and a deadline section. User interactions are handled via the provided ViewModel.
+ */
 @Composable
 fun GroupScreen(
     navController: NavHostController? = null,
@@ -55,7 +60,7 @@ fun GroupScreen(
             // 상단바
             LogoTopAppBar(
                 leftIcon = painterResource(R.drawable.ic_done),
-                hasNotification = false,
+                hasNotification = true,
                 onLeftClick = { },
                 onRightClick = { }
             )

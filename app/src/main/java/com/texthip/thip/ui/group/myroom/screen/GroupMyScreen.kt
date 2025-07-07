@@ -27,6 +27,14 @@ import com.texthip.thip.ui.group.myroom.mock.GroupCardItemRoomData
 import com.texthip.thip.ui.group.myroom.component.GroupMyRoomFilterRow
 import com.texthip.thip.ui.theme.ThipTheme
 
+/**
+ * Displays a screen listing group rooms with filter options for recruiting status.
+ *
+ * Shows a top app bar, filter toggles, and a scrollable list of group rooms. Users can filter the list to show only recruiting, only non-recruiting, or all rooms. Clicking a room card triggers the provided callback.
+ *
+ * @param allDataList The complete list of group room data to display and filter.
+ * @param onCardClick Callback invoked when a room card is clicked, receiving the selected room data.
+ */
 @Composable
 fun GroupMyScreen(
     allDataList: List<GroupCardItemRoomData>,
@@ -70,11 +78,11 @@ fun GroupMyScreen(
                 }
             )
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(20.dp),
-                contentPadding = PaddingValues(bottom = 20.dp),
+                contentPadding = PaddingValues(top = 10.dp, bottom = 20.dp),
                 modifier = Modifier
                     .fillMaxSize()
             ) {

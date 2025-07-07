@@ -25,10 +25,18 @@ import com.texthip.thip.ui.theme.ThipTheme.colors
 import com.texthip.thip.ui.theme.ThipTheme.typography
 
 
+/**
+ * Displays a horizontal card with a book cover image and title, styled for search results.
+ *
+ * The card is clickable and fills the available width. If an image resource is provided, it is shown as the book cover; otherwise, a default image is used. The title is displayed next to the image.
+ *
+ * @param title The book title to display.
+ * @param imageRes Optional image resource ID for the book cover. Defaults to a sample image if not specified.
+ * @param onClick Lambda invoked when the card is clicked.
+ */
 @Composable
 fun CardBookSearch(
     modifier: Modifier = Modifier,
-    number: Int,
     title: String,
     imageRes: Int? = R.drawable.bookcover_sample, // 기본 이미지 리소스
     onClick: () -> Unit = {}
@@ -36,18 +44,9 @@ fun CardBookSearch(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clickable { onClick() }
-            .padding(vertical = 8.dp),
+            .clickable { onClick() },
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // 넘버
-        Text(
-            text = "$number.",
-            style = typography.menu_m500_s16_h24,
-            color = colors.White,
-            modifier = Modifier.padding(end = 12.dp)
-        )
-
         // 이미지
         Box(
             modifier = Modifier
@@ -75,6 +74,9 @@ fun CardBookSearch(
     }
 }
 
+/**
+ * Displays a preview of the CardBookSearch composable with sample data for UI development.
+ */
 @Preview
 @Composable
 fun CardBookSearchPreview() {
@@ -84,7 +86,6 @@ fun CardBookSearchPreview() {
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         CardBookSearch(
-            number = 1,
             title = "단 한번의 삶"
         )
     }

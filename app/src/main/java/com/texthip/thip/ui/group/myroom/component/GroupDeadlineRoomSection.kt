@@ -16,6 +16,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.texthip.thip.R
+import com.texthip.thip.ui.common.buttons.GenreChipRow
 import com.texthip.thip.ui.common.cards.CardItemRoom
 import com.texthip.thip.ui.group.myroom.mock.GroupRoomSectionData
 import com.texthip.thip.ui.group.myroom.mock.GroupCardItemRoomData
@@ -23,14 +24,21 @@ import com.texthip.thip.ui.theme.ThipTheme
 import com.texthip.thip.ui.theme.ThipTheme.colors
 import com.texthip.thip.ui.theme.ThipTheme.typography
 
+/**
+ * Displays a horizontally scrollable pager of grouped room sections, each with genre filtering and up to three room cards.
+ *
+ * Each page represents a room section with a title, selectable genre chips, and a filtered list of room cards. Cards are visually scaled based on selection, and the pager layout dynamically adjusts to the container width. Invokes a callback when a room card is clicked.
+ *
+ * @param roomSections The list of room sections to display, each containing genres and associated rooms.
+ * @param onRoomClick Callback invoked when a room card is selected.
+ */
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 fun GroupRoomDeadlineSection(
     roomSections: List<GroupRoomSectionData>,
     onRoomClick: (GroupCardItemRoomData) -> Unit
 ) {
-    val cardWidth = 320.dp
-    val pageSpacing = 12.dp
+    val sideMargin = 30.dp
 
     val pagerState = rememberPagerState(
         initialPage = 0,
@@ -48,16 +56,21 @@ fun GroupRoomDeadlineSection(
                 .height(588.dp),
             contentAlignment = Alignment.Center
         ) {
-            val horizontalPadding = ((maxWidth - cardWidth) / 2).coerceAtLeast(0.dp)
+            val horizontalPadding = sideMargin
+            val cardWidth = maxWidth - (horizontalPadding * 2)
+            val scale = 0.9f
+            val desiredGap = 12.dp // TODO: 이 부분을 10dp로 하면 양 옆의 카드에 살짝 다음 내용이 보여서 12정도가 어떤지 
+
+            val pageSpacing = (-(cardWidth - (cardWidth * scale)) / 2) + desiredGap
 
             HorizontalPager(
                 state = pagerState,
-                contentPadding = PaddingValues(horizontal = horizontalPadding),
+                contentPadding = PaddingValues(horizontal = 30.dp),
                 pageSpacing = pageSpacing,
                 modifier = Modifier.fillMaxWidth()
             ) { page ->
                 val section = roomSections[page]
-                var selectedGenre by remember { mutableStateOf(0) }
+                var selectedGenre by remember { mutableIntStateOf(0) }
 
                 val isCurrent = pagerState.currentPage == page
                 val scale = if (isCurrent) 1f else 0.9f
@@ -79,7 +92,7 @@ fun GroupRoomDeadlineSection(
                             ),
                             shape = RoundedCornerShape(14.dp)
                         )
-                        .padding(vertical = 20.dp, horizontal = 12.dp)
+                        .padding(vertical = 20.dp, horizontal = 20.dp)
                 ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally
@@ -127,17 +140,14 @@ fun GroupRoomDeadlineSection(
                 }
             }
         }
-
-        SimplePagerIndicator(
-            pageCount = roomSections.size,
-            currentPage = pagerState.currentPage,
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .padding(top = 8.dp)
-        )
     }
 }
 
+/**
+ * Displays a preview of the GroupRoomDeadlineSection composable with sample room section data and genres.
+ *
+ * This preview includes three types of room sections: rooms with imminent deadlines, popular rooms, and influencer/author rooms, each populated with example data.
+ */
 @Preview()
 @Composable
 fun PreviewGroupRoomPagerSection() {
