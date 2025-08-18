@@ -8,7 +8,7 @@ import retrofit2.http.POST
 
 interface AuthService {
     //신규유저 여부 확인
-    @POST("oauth2/users")
+    @POST("auth/users")
     suspend fun checkNewUser(
         @Body request: AuthRequest
     ): BaseResponse<AuthResponse>
