@@ -43,6 +43,7 @@ fun ImageViewerModal(
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .background(colors.Black.copy(alpha = 0.8f))
             .clickable { onDismiss() }
     ) {
         // 닫기 버튼

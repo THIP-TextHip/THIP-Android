@@ -147,7 +147,7 @@ fun FeedCommentScreen(
 
     Box(modifier = Modifier.fillMaxSize()) {
         Box(
-            modifier = if (isBottomSheetVisible || showDialog) {
+            modifier = if (isBottomSheetVisible || showDialog || showImageViewer) {
                 Modifier
                     .fillMaxSize()
                     .blur(5.dp)
