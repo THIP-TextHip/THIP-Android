@@ -21,6 +21,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.texthip.thip.R
+import com.texthip.thip.ui.group.makeroom.util.WheelPickerUtils
 import com.texthip.thip.ui.theme.ThipTheme
 import com.texthip.thip.ui.theme.ThipTheme.colors
 import com.texthip.thip.ui.theme.ThipTheme.typography
@@ -50,46 +51,35 @@ fun GroupRoomDurationPicker(
         }
     }
 
+    // 날짜 유효성 검사 및 자동 조정 (통합)
+    LaunchedEffect(startDate, endDate) {
+        val (validatedStart, validatedEnd) = WheelPickerUtils.validateDateRange(
+            startDate = startDate,
+            endDate = endDate,
+            minDate = tomorrow,
+            maxDate = maxDate
+        )
+
+        // 날짜가 조정되었으면 업데이트
+        var needsUpdate = false
+        if (validatedStart != startDate) {
+            startDate = validatedStart
+            needsUpdate = true
+        }
+        if (validatedEnd != endDate) {
+            endDate = validatedEnd
+            needsUpdate = true
+        }
+
+        // 유효한 범위이고 조정이 없었으면 콜백 호출
+        if (!needsUpdate && validatedEnd.isAfter(validatedStart)) {
+            onDateRangeSelected(validatedStart, validatedEnd)
+        }
+    }
+
     // 날짜 범위 계산
     val daysBetween = ChronoUnit.DAYS.between(startDate, endDate)
     val isOverLimit = daysBetween > 91
-
-    // 날짜 선택 콜백
-    LaunchedEffect(startDate, endDate) {
-        if (endDate.isAfter(startDate)) {
-            onDateRangeSelected(startDate, endDate)
-        }
-    }
-
-    // 날짜 유효성 검사 및 자동 조정
-    LaunchedEffect(startDate) {
-        val adjustedStartDate = when {
-            startDate.isBefore(tomorrow) -> tomorrow
-            startDate.isAfter(maxDate) -> maxDate
-            else -> startDate
-        }
-
-        if (adjustedStartDate != startDate) {
-            startDate = adjustedStartDate
-        }
-
-        // 끝 날짜가 시작 날짜보다 빠르면 조정
-        if (endDate.isBefore(startDate.plusDays(1))) {
-            endDate = startDate.plusDays(1)
-        }
-    }
-
-    LaunchedEffect(endDate) {
-        val adjustedEndDate = when {
-            endDate.isAfter(maxDate) -> maxDate
-            endDate.isBefore(startDate.plusDays(1)) -> startDate.plusDays(1)
-            else -> endDate
-        }
-
-        if (adjustedEndDate != endDate) {
-            endDate = adjustedEndDate
-        }
-    }
 
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
@@ -111,6 +101,7 @@ fun GroupRoomDurationPicker(
                 minDate = tomorrow,
                 maxDate = maxDate,
                 onDateSelected = { newDate ->
+                    isPickerTouched = true
                     startDate = newDate
                 },
                 modifier = Modifier
@@ -135,6 +126,7 @@ fun GroupRoomDurationPicker(
                 minDate = tomorrow,
                 maxDate = maxDate,
                 onDateSelected = { newDate ->
+                    isPickerTouched = true
                     endDate = newDate
                 },
                 modifier = Modifier
