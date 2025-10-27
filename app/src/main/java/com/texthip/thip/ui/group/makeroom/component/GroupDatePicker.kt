@@ -111,7 +111,7 @@ fun GroupDatePicker(
             GroupWheelPicker(
                 modifier = Modifier.width(32.dp),
                 items = days,
-                selectedItem = day.coerceAtMost(days.max()),
+                selectedItem = day.coerceAtMost(days.maxOrNull() ?: 1),
                 onItemSelected = { newDay ->
                     val newDate = LocalDate.of(year, month, newDay)
                     onDateSelected(newDate)

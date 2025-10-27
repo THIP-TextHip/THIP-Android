@@ -137,7 +137,7 @@ fun GroupRoomDurationPicker(
             // 끝 날짜 Picker
             GroupDatePicker(
                 selectedDate = endDate,
-                minDate = tomorrow,
+                minDate = startDate.plusDays(1),
                 maxDate = maxDate,
                 onDateSelected = { newDate ->
                     isPickerTouched = true
