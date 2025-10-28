@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -289,9 +290,8 @@ fun GroupMakeRoomContent(
         }
 
         if (uiState.showConfirmDialog) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
+            Dialog(
+                onDismissRequest = { onToggleConfirmDialog(false) }
             ) {
                 DialogPopup(
                     title = stringResource(R.string.group_create_confirm_title),
