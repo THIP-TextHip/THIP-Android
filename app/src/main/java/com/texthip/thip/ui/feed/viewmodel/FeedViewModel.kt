@@ -24,6 +24,7 @@ data class FeedUiState(
     val myFeeds: List<MyFeedItem> = emptyList(),
     val recentWriters: List<RecentWriterList> = emptyList(),
     val myFeedInfo: FeedMineInfoResponse? = null,
+    val recommendedFeeds: List<AllFeedItem> = emptyList(), // 추천글 목록
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false, // 탭 전환용 로딩
     val isPullToRefreshing: Boolean = false, // Pull to refresh용 로딩
@@ -68,6 +69,7 @@ class FeedViewModel @Inject constructor(
         loadAllFeeds()
         fetchRecentWriters()
         fetchMyFeedInfo()
+        loadRecommendedFeeds()
         observeFeedUpdates()
     }
 
@@ -104,11 +106,11 @@ class FeedViewModel @Inject constructor(
                     }
                 }
 
-                _uiState.update { 
+                _uiState.update {
                     it.copy(
-                        allFeeds = updatedAllFeeds, 
+                        allFeeds = updatedAllFeeds,
                         myFeeds = updatedMyFeeds
-                    ) 
+                    )
                 }
             }
         }
@@ -143,12 +145,12 @@ class FeedViewModel @Inject constructor(
             }
         }
     }
-    
+
     fun refreshDataAndScrollToTop() {
         refreshData()
         // 스크롤 상단 이동은 Screen에서 처리
     }
-    
+
     fun refreshOnBottomNavReselect() {
         // 바텀 네비게이션에서 같은 탭 다시 클릭 시 (스크롤은 Screen에서 처리)
         refreshData()
@@ -537,6 +539,14 @@ class FeedViewModel @Inject constructor(
                 allFeeds = currentAllFeeds,
                 myFeeds = currentMyFeeds
             )
+        }
+    }
+
+    // 추천글 로드
+    private fun loadRecommendedFeeds() {
+        viewModelScope.launch {
+            // TODO: 실제 추천글 API 연결
+            updateState { it.copy(recommendedFeeds = emptyList()) }
         }
     }
 }

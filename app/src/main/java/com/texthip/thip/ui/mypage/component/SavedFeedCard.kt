@@ -49,18 +49,18 @@ fun SavedFeedCard(
 ) {
     val hasImages = feedItem.imageUrls.isNotEmpty()
     val maxTextLines = if (hasImages) 3 else 8
-    
+
     // 실제 텍스트 줄 수를 기준으로 표시할 텍스트 계산
     val processedText = remember(feedItem.content, hasImages) {
         val lines = feedItem.content.split("\n")
         val nonEmptyLines = mutableListOf<Int>() // 실제 텍스트가 있는 줄의 인덱스
-        
+
         lines.forEachIndexed { index, line ->
             if (line.trim().isNotEmpty()) {
                 nonEmptyLines.add(index)
             }
         }
-        
+
         if (nonEmptyLines.size <= maxTextLines) {
             // 실제 텍스트 줄이 제한보다 적으면 전체 표시
             feedItem.content
@@ -70,9 +70,8 @@ fun SavedFeedCard(
             lines.take(lastAllowedLineIndex + 1).joinToString("\n")
         }
     }
-    
-    // 잘림 여부는 파생 값으로 계산
-    val isTextTruncated = processedText != feedItem.content
+
+    var isTextTruncated by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier
@@ -111,9 +110,13 @@ fun SavedFeedCard(
                     text = processedText,
                     style = typography.feedcopy_r400_s14_h20,
                     color = colors.White,
+                    maxLines = maxTextLines,
                     modifier = Modifier.fillMaxWidth(),
+                    onTextLayout = { textLayoutResult ->
+                        isTextTruncated = textLayoutResult.hasVisualOverflow
+                    }
                 )
-                
+
                 // 텍스트가 잘린 경우에만 "...더보기" 표시
                 if (isTextTruncated) {
                     Image(

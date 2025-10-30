@@ -54,6 +54,7 @@ import com.texthip.thip.ui.common.topappbar.LogoTopAppBar
 import com.texthip.thip.ui.feed.component.FeedSubscribeBarlist
 import com.texthip.thip.ui.feed.component.MyFeedCard
 import com.texthip.thip.ui.feed.component.MySubscribeBarlist
+import com.texthip.thip.ui.feed.component.RecommendedFeedCarousel
 import com.texthip.thip.ui.feed.mock.FeedStateUpdateResult
 import com.texthip.thip.ui.feed.viewmodel.FeedUiState
 import com.texthip.thip.ui.feed.viewmodel.FeedViewModel
@@ -513,10 +514,20 @@ private fun FeedContent(
                                 onClick = onNavigateToMySubscription
                             )
                         }
+
+                        // 10번째 항목 후에 추천 섹션 삽입
                         itemsIndexed(
                             feedUiState.allFeeds,
-                            key = { _, item -> item.feedId }) { index, allFeed ->
-                            // AllFeedItem을 FeedItem으로 변환
+                            key = { _, item -> item.feedId }
+                        ) { index, allFeed ->
+                            // 첫 항목 위에 여백 추가
+                            if (index == 0) {
+                                Spacer(modifier = Modifier.height(20.dp))
+                            } else {
+                                Spacer(modifier = Modifier.height(40.dp))
+                            }
+
+                            // 피드 카드 표시
                             val feedItem = FeedItem(
                                 id = allFeed.feedId.toLong(),
                                 userProfileImage = allFeed.creatorProfileImageUrl,
@@ -534,37 +545,37 @@ private fun FeedContent(
                                 tags = emptyList(),
                                 imageUrls = allFeed.contentUrls
                             )
-
-                            Spacer(modifier = Modifier.height(if (index == 0) 20.dp else 40.dp))
-
+                            
                             SavedFeedCard(
                                 feedItem = feedItem,
                                 bottomTextColor = hexToColor(allFeed.aliasColor),
-                                onBookmarkClick = {
-                                    onChangeFeedSave(feedItem.id)
-                                },
-                                onLikeClick = {
-                                    onChangeFeedLike(feedItem.id)
-                                },
-                                onContentClick = {
-                                    onNavigateToFeedComment(feedItem.id)
-                                },
-                                onCommentClick = {
-                                    onNavigateToFeedComment(feedItem.id)
-                                },
-                                onBookClick = {
-                                    onNavigateToBookDetail(allFeed.isbn)
-                                },
-                                onProfileClick = {
-                                    onNavigateToUserProfile(allFeed.creatorId)
-                                }
+                                onBookmarkClick = { onChangeFeedSave(feedItem.id) },
+                                onLikeClick = { onChangeFeedLike(feedItem.id) },
+                                onContentClick = { onNavigateToFeedComment(feedItem.id) },
+                                onCommentClick = { onNavigateToFeedComment(feedItem.id) },
+                                onBookClick = { onNavigateToBookDetail(allFeed.isbn) },
+                                onProfileClick = { onNavigateToUserProfile(allFeed.creatorId) }
                             )
-                            Spacer(modifier = Modifier.height(40.dp))
-                            if (index != feedUiState.allFeeds.lastIndex) {
-                                HorizontalDivider(
-                                    color = colors.DarkGrey02,
-                                    thickness = 6.dp
+                            
+                            // 10번째 피드 후에 추천 섹션 삽입
+                            if (index == 9 && feedUiState.recommendedFeeds.isNotEmpty()) {
+                                Spacer(modifier = Modifier.height(40.dp))
+                                HorizontalDivider(color = colors.DarkGrey02, thickness = 6.dp)
+                                Spacer(modifier = Modifier.height(40.dp))
+                                
+                                RecommendedFeedCarousel(
+                                    recommendedFeeds = feedUiState.recommendedFeeds,
+                                    onFeedClick = { feedId -> onNavigateToFeedComment(feedId) }
                                 )
+                                
+                                Spacer(modifier = Modifier.height(40.dp))
+                                HorizontalDivider(color = colors.DarkGrey02, thickness = 6.dp)
+                            } else {
+                                Spacer(modifier = Modifier.height(40.dp))
+                                // 마지막 항목이 아닐 때만 구분선 표시
+                                if (index != feedUiState.allFeeds.lastIndex) {
+                                    HorizontalDivider(color = colors.DarkGrey02, thickness = 6.dp)
+                                }
                             }
                         }
                     }

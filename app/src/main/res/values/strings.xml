@@ -466,6 +466,10 @@
     <!-- GenreManager API constants -->
     <string name="api_genre_science_it" translatable="false">과학/IT</string>
 
+    <!-- 추천 피드 관련 -->
+    <string name="recommended_feeds_title">지금 뜨는 추천 글</string>
+    <string name="recommended_feeds_subtitle">비슷한 취향의 인플루언서, 작가가\n추천하는 도서를 만나보세요.</string>
+
     <!-- Google login constants -->
     <string name="default_web_client_id" translatable="false">211189590640-a2ul4bnsvislm12ov7k8eu61mtketl8d.apps.googleusercontent.com</string>
 
