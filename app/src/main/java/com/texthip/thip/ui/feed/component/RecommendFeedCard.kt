@@ -35,7 +35,7 @@ import com.texthip.thip.ui.theme.ThipTheme.typography
 import com.texthip.thip.utils.color.hexToColor
 
 @Composable
-fun RecommendedFeedCard(
+fun RecommendFeedCard(
     feedItem: AllFeedItem,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -157,7 +157,7 @@ fun RecommendedFeedCard(
 @Composable
 private fun RecommendedFeedCardPreview() {
     ThipTheme {
-        RecommendedFeedCard(
+        RecommendFeedCard(
             AllFeedItem(
                 feedId = 1,
                 creatorId = 123L,
