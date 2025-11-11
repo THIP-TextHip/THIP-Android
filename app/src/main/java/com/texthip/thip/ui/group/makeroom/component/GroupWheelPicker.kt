@@ -209,7 +209,6 @@ fun <T> GroupWheelPicker(
                 }
             }
 
-            // 중앙 + 위 아래 한 개만 보이도록!
             val visibleRange = remember(isScrollEnabled) { if (isScrollEnabled) -1..1 else 0..0 }
 
             visibleRange.forEach { relIdx ->

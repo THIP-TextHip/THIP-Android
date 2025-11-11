@@ -11,8 +11,8 @@ data class GroupMakeRoomUiState(
     val selectedGenreIndex: Int = -1,
     val roomTitle: String = "",
     val roomDescription: String = "",
-    val meetingStartDate: LocalDate = LocalDate.now(),
-    val meetingEndDate: LocalDate = LocalDate.now().plusDays(1),
+    val meetingStartDate: LocalDate = LocalDate.now().plusDays(1),
+    val meetingEndDate: LocalDate = LocalDate.now().plusDays(2),
     val memberLimit: Int = 30,
     val isPrivate: Boolean = false,
     val password: String = "",
@@ -35,8 +35,10 @@ data class GroupMakeRoomUiState(
     // 유효성 검사 로직
     val isDurationValid: Boolean
         get() {
+            val today = LocalDate.now()
+            val tomorrow = today.plusDays(1)
             val daysBetween = ChronoUnit.DAYS.between(meetingStartDate, meetingEndDate)
-            return daysBetween in 1..90
+            return !meetingStartDate.isBefore(tomorrow) && daysBetween in 1..91
         }
 
     val isCountValid: Boolean
