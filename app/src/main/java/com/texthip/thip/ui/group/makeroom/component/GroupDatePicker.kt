@@ -6,14 +6,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,13 +38,13 @@ fun GroupDatePicker(
     val month = selectedDate.monthValue
     val day = selectedDate.dayOfMonth
 
-    // 유효한 범위 계산 - 날짜 변경 시 안정성을 위해 remember 사용
-    val years = remember(minDate.year, maxDate.year) { 
-        (minDate.year..maxDate.year).toList() 
+    // 유효한 범위 계산 - 단순하게 전체 범위 사용
+    val years = remember(minDate.year, maxDate.year) {
+        (minDate.year..maxDate.year).toList()
     }
     val months = remember { (1..12).toList() }
-    val days = remember(year, month) { 
-        (1..LocalDate.of(year, month, 1).lengthOfMonth()).toList() 
+    val days = remember(year, month) {
+        (1..LocalDate.of(year, month, 1).lengthOfMonth()).toList()
     }
 
     Row(
@@ -62,7 +61,8 @@ fun GroupDatePicker(
                     val newDate = try {
                         LocalDate.of(newYear, month, day)
                     } catch (e: Exception) {
-                        LocalDate.of(newYear, month, 1)
+                        val lastDay = LocalDate.of(newYear, month, 1).lengthOfMonth()
+                        LocalDate.of(newYear, month, lastDay)
                     }
                     onDateSelected(newDate)
                 },
@@ -88,7 +88,8 @@ fun GroupDatePicker(
                     val newDate = try {
                         LocalDate.of(year, newMonth, day)
                     } catch (e: Exception) {
-                        LocalDate.of(year, newMonth, 1)
+                        val lastDay = LocalDate.of(year, newMonth, 1).lengthOfMonth()
+                        LocalDate.of(year, newMonth, lastDay)
                     }
                     onDateSelected(newDate)
                 },
@@ -109,10 +110,9 @@ fun GroupDatePicker(
             GroupWheelPicker(
                 modifier = Modifier.width(32.dp),
                 items = days,
-                selectedItem = day.coerceAtMost(days.max()),
+                selectedItem = day.coerceAtMost(days.maxOrNull() ?: 1),
                 onItemSelected = { newDay ->
-                    val newDate = LocalDate.of(year, month, newDay)
-                    onDateSelected(newDate)
+                    onDateSelected(LocalDate.of(year, month, newDay))
                 },
                 displayText = { it.toString() }
             )

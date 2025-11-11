@@ -31,6 +31,8 @@
     <string name="add_to_my_feed">내 피드에 추가</string>
     <string name="yes">예</string>
     <string name="no">아니오</string>
+    <string name="cancel">취소</string>
+    <string name="confirm">확인</string>
     <string name="post">글 등록</string>
     <string name="follow">팔로우</string>
     <string name="change_book">책 변경</string>
@@ -314,7 +316,10 @@
     <string name="group_room_duration_active_comment">%1$d월 %2$d일 자정에 자동으로 모집 마감되고 활동이 가능합니다.</string>
     <string name="group_book_search">검색해서 찾기</string>
     <string name="group_room_duration_initial_comment">모임방 활동이 시작되면, 독서메이트 모집이 자동으로 종료돼요.</string>
+    <string name="group_room_duration_recruitment_period">활동 시작 전 독서메이트 모집 기간 : %d일</string>
     <string name="group_input_count">%1$d / %2$d</string>
+    <string name="group_create_confirm_title">모임 만들기</string>
+    <string name="group_create_confirm_message">- 모집기간 : %1$s ~ %2$s\n- 활동기간 : %3$s ~ %4$s\n\n모집기간은 독서메이트 신청을 받는 기간, 활동기간은 실제 모임이 진행되는 기간이에요.\n독서메이트 모집은 조기 마감이 가능하며, 즉시 활동을 시작할 수 있어요.\n\n이 모임을 생성할까요?</string>
 
     <!--    splash screen   -->
     <string name="splash_thip">띱!</string>

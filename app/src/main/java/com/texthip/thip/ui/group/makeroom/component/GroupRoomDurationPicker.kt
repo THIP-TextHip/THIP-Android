@@ -21,11 +21,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.texthip.thip.R
+import com.texthip.thip.ui.group.makeroom.util.WheelPickerUtils
 import com.texthip.thip.ui.theme.ThipTheme
 import com.texthip.thip.ui.theme.ThipTheme.colors
 import com.texthip.thip.ui.theme.ThipTheme.typography
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
+import kotlinx.coroutines.delay
 
 @Composable
 fun GroupRoomDurationPicker(
@@ -40,6 +42,7 @@ fun GroupRoomDurationPicker(
     var startDate by rememberSaveable { mutableStateOf(tomorrow) }
     var endDate by rememberSaveable { mutableStateOf(tomorrow.plusDays(1)) }
     var isPickerTouched by rememberSaveable { mutableStateOf(false) }
+    var debouncedRecruitmentDays by rememberSaveable { mutableStateOf<Int?>(null) }
 
     // 첫 시작 시에만 모든 날짜를 내일 기준으로 초기화
     LaunchedEffect(Unit) {
@@ -47,49 +50,50 @@ fun GroupRoomDurationPicker(
             startDate = tomorrow
             endDate = tomorrow.plusDays(1)
             isInitialized = true
+            // picker 업데이트 완료 대기 후 상태 리셋
+            delay(100)
+            isPickerTouched = false
+            debouncedRecruitmentDays = null
+        }
+    }
+
+    // 모집 기간 계산
+    LaunchedEffect(startDate, isPickerTouched) {
+        if (isPickerTouched) {
+            delay(100)
+            debouncedRecruitmentDays = ChronoUnit.DAYS.between(today, startDate).toInt()
+        }
+    }
+
+    // 날짜 유효성 검사 및 자동 조정 (통합)
+    LaunchedEffect(startDate, endDate) {
+        val (validatedStart, validatedEnd) = WheelPickerUtils.validateDateRange(
+            startDate = startDate,
+            endDate = endDate,
+            minDate = tomorrow,
+            maxDate = maxDate
+        )
+
+        // 날짜가 조정되었으면 업데이트
+        var needsUpdate = false
+        if (validatedStart != startDate) {
+            startDate = validatedStart
+            needsUpdate = true
+        }
+        if (validatedEnd != endDate) {
+            endDate = validatedEnd
+            needsUpdate = true
+        }
+
+        // 유효한 범위이고 조정이 없었으면 콜백 호출
+        if (!needsUpdate && validatedEnd.isAfter(validatedStart)) {
+            onDateRangeSelected(validatedStart, validatedEnd)
         }
     }
 
     // 날짜 범위 계산
     val daysBetween = ChronoUnit.DAYS.between(startDate, endDate)
     val isOverLimit = daysBetween > 91
-
-    // 날짜 선택 콜백
-    LaunchedEffect(startDate, endDate) {
-        if (endDate.isAfter(startDate)) {
-            onDateRangeSelected(startDate, endDate)
-        }
-    }
-
-    // 날짜 유효성 검사 및 자동 조정
-    LaunchedEffect(startDate) {
-        val adjustedStartDate = when {
-            startDate.isBefore(tomorrow) -> tomorrow
-            startDate.isAfter(maxDate) -> maxDate
-            else -> startDate
-        }
-
-        if (adjustedStartDate != startDate) {
-            startDate = adjustedStartDate
-        }
-
-        // 끝 날짜가 시작 날짜보다 빠르면 조정
-        if (endDate.isBefore(startDate.plusDays(1))) {
-            endDate = startDate.plusDays(1)
-        }
-    }
-
-    LaunchedEffect(endDate) {
-        val adjustedEndDate = when {
-            endDate.isAfter(maxDate) -> maxDate
-            endDate.isBefore(startDate.plusDays(1)) -> startDate.plusDays(1)
-            else -> endDate
-        }
-
-        if (adjustedEndDate != endDate) {
-            endDate = adjustedEndDate
-        }
-    }
 
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
@@ -111,6 +115,7 @@ fun GroupRoomDurationPicker(
                 minDate = tomorrow,
                 maxDate = maxDate,
                 onDateSelected = { newDate ->
+                    isPickerTouched = true
                     startDate = newDate
                 },
                 modifier = Modifier
@@ -132,9 +137,10 @@ fun GroupRoomDurationPicker(
             // 끝 날짜 Picker
             GroupDatePicker(
                 selectedDate = endDate,
-                minDate = tomorrow,
+                minDate = startDate.plusDays(1),
                 maxDate = maxDate,
                 onDateSelected = { newDate ->
+                    isPickerTouched = true
                     endDate = newDate
                 },
                 modifier = Modifier
@@ -151,6 +157,8 @@ fun GroupRoomDurationPicker(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.End
         ) {
+            val recruitmentDays = debouncedRecruitmentDays
+
             when {
                 isOverLimit -> {
                     Text(
@@ -161,6 +169,7 @@ fun GroupRoomDurationPicker(
                         modifier = Modifier.padding(top = 12.dp)
                     )
                 }
+
                 !isPickerTouched -> {
                     Text(
                         text = stringResource(R.string.group_room_duration_initial_comment),
@@ -170,6 +179,20 @@ fun GroupRoomDurationPicker(
                         modifier = Modifier.padding(top = 12.dp)
                     )
                 }
+
+                isPickerTouched && recruitmentDays != null -> {
+                    Text(
+                        text = stringResource(
+                            R.string.group_room_duration_recruitment_period,
+                            recruitmentDays
+                        ),
+                        style = typography.info_r400_s12,
+                        color = colors.NeonGreen,
+                        textAlign = TextAlign.End,
+                        modifier = Modifier.padding(top = 12.dp)
+                    )
+                }
+
                 else -> {
                     Text(
                         text = stringResource(

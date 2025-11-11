@@ -68,17 +68,23 @@ fun <T> GroupWheelPicker(
     val spacingPx = remember(density) { with(density) { 9.dp.toPx() } }
     val itemSpacing = remember(itemHeightPx, spacingPx) { itemHeightPx + spacingPx }
 
-    val getCircularIndex = remember(items.size) { { index: Int ->
-        WheelPickerUtils.getCircularIndex(index, items.size)
-    } }
+    val getCircularIndex = remember(items.size) {
+        { index: Int ->
+            WheelPickerUtils.getCircularIndex(index, items.size)
+        }
+    }
 
-    val normalizeOffset = remember(itemSpacing, items.size, circular) { { offset: Float ->
-        WheelPickerUtils.normalizeOffset(offset, itemSpacing, items.size, circular)
-    } }
+    val normalizeOffset = remember(itemSpacing, items.size, circular) {
+        { offset: Float ->
+            WheelPickerUtils.normalizeOffset(offset, itemSpacing, items.size, circular)
+        }
+    }
 
-    val offsetToIndex = remember(itemSpacing, items.size, circular) { { offset: Float ->
-        WheelPickerUtils.offsetToIndex(offset, itemSpacing, items.size, circular)
-    } }
+    val offsetToIndex = remember(itemSpacing, items.size, circular) {
+        { offset: Float ->
+            WheelPickerUtils.offsetToIndex(offset, itemSpacing, items.size, circular)
+        }
+    }
 
     // 선택 아이템이 바뀌면 중앙에 오도록 offset 이동
     LaunchedEffect(selectedItem) {
@@ -104,7 +110,7 @@ fun <T> GroupWheelPicker(
 
     val containerHeight = remember(itemHeight) { (itemHeight * 3 + 36).dp }
     val textStyle = typography.info_r400_s12
-    
+
     Box(
         modifier = modifier.height(containerHeight)
     ) {
@@ -203,7 +209,6 @@ fun <T> GroupWheelPicker(
                 }
             }
 
-            // 중앙 + 위 아래 한 개만 보이도록!
             val visibleRange = remember(isScrollEnabled) { if (isScrollEnabled) -1..1 else 0..0 }
 
             visibleRange.forEach { relIdx ->

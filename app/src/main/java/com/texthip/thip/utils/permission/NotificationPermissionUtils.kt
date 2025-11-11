@@ -7,13 +7,13 @@ import android.os.Build
 import androidx.core.content.ContextCompat
 
 object NotificationPermissionUtils {
-    
+
 
     // POST_NOTIFICATIONS 권한이 필요한지 확인
     fun isNotificationPermissionRequired(): Boolean {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
     }
-    
+
 
     // 알림 권한이 허용되었는지 확인
     fun isNotificationPermissionGranted(context: Context): Boolean {
@@ -27,7 +27,7 @@ object NotificationPermissionUtils {
             true
         }
     }
-    
+
 
     // 알림 권한 요청이 필요한지 확인
     fun shouldRequestNotificationPermission(context: Context): Boolean {

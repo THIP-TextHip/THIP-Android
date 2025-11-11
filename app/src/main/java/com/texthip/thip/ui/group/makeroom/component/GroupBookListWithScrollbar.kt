@@ -4,13 +4,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -36,7 +36,7 @@ fun GroupBookListWithScrollbar(
     onLoadMore: () -> Unit = {}
 ) {
     val listState = rememberLazyListState()
-    
+
     val shouldLoadMore = remember {
         derivedStateOf {
             val layoutInfo = listState.layoutInfo
@@ -48,7 +48,7 @@ fun GroupBookListWithScrollbar(
     }
 
     LaunchedEffect(shouldLoadMore.value, hasMore, isLoadingMore) {
-        if (shouldLoadMore.value && hasMore && !isLoadingMore && books.isNotEmpty()) {
+        if (shouldLoadMore.value && hasMore && !isLoadingMore) {
             onLoadMore()
         }
     }
@@ -57,7 +57,8 @@ fun GroupBookListWithScrollbar(
         state = listState,
         modifier = Modifier
             .fillMaxWidth()
-            .drawVerticalScrollbar(rememberScrollState())
+            .fillMaxHeight()
+            .drawVerticalScrollbar(listState)
     ) {
         items(books) { book ->
             CardBookSearch(
@@ -75,7 +76,7 @@ fun GroupBookListWithScrollbar(
             )
             Spacer(modifier = Modifier.height(12.dp))
         }
-        
+
         if (isLoadingMore) {
             item {
                 Box(

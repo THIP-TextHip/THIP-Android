@@ -3,11 +3,10 @@ package com.texthip.thip.ui.group.makeroom.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.texthip.thip.R
+import com.texthip.thip.data.manager.Genre
 import com.texthip.thip.data.model.book.response.BookSavedResponse
 import com.texthip.thip.data.model.book.response.BookSearchItem
-import com.texthip.thip.data.model.book.response.BookUserSaveList
 import com.texthip.thip.data.model.rooms.request.CreateRoomRequest
-import com.texthip.thip.data.manager.Genre
 import com.texthip.thip.data.provider.StringResourceProvider
 import com.texthip.thip.data.repository.BookRepository
 import com.texthip.thip.data.repository.RoomsRepository
@@ -36,9 +35,6 @@ class GroupMakeRoomViewModel @Inject constructor(
     private var searchJob: Job? = null
     private var loadMoreSearchJob: Job? = null
     private var savedBooksCursor: String? = null
-    private var groupBooksCursor: String? = null
-    private var isLoadingSavedBooks = false
-    private var isLoadingGroupBooks = false
 
     companion object {
         private val DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy.MM.dd")
@@ -88,21 +84,25 @@ class GroupMakeRoomViewModel @Inject constructor(
     }
 
     private fun loadBooks() {
-        updateState { it.copy(isLoadingBooks = true) }
         loadSavedBooks(isInitial = true)
-        loadGroupBooks(isInitial = true)
+        // 모임 생성 화면에서는 저장된 책만 표시
     }
 
     fun loadSavedBooks(isInitial: Boolean = false) {
-        if (isLoadingSavedBooks) return
-        if (!isInitial && _uiState.value.isLastSavedBooks) return
+        val currentState = _uiState.value
+        if (currentState.isLoadingBooks || currentState.isLoadingMoreSavedBooks) return
+        if (!isInitial && currentState.isLastSavedBooks) return
 
         viewModelScope.launch {
             try {
-                isLoadingSavedBooks = true
-                
                 if (isInitial) {
-                    updateState { it.copy(savedBooks = emptyList(), isLastSavedBooks = false) }
+                    updateState {
+                        it.copy(
+                            savedBooks = emptyList(),
+                            isLastSavedBooks = false,
+                            isLoadingBooks = true
+                        )
+                    }
                     savedBooksCursor = null
                 } else {
                     updateState { it.copy(isLoadingMoreSavedBooks = true) }
@@ -113,7 +113,8 @@ class GroupMakeRoomViewModel @Inject constructor(
                 bookRepository.getBooks("SAVED", cursor)
                     .onSuccess { response ->
                         if (response != null) {
-                            val currentList = if (isInitial) emptyList() else _uiState.value.savedBooks
+                            val currentList =
+                                if (isInitial) emptyList() else _uiState.value.savedBooks
                             val newBooks = response.bookList.map { it.toBookData() }
                             updateState {
                                 it.copy(
@@ -132,62 +133,11 @@ class GroupMakeRoomViewModel @Inject constructor(
                         }
                     }
             } finally {
-                isLoadingSavedBooks = false
-                updateState { 
+                updateState {
                     it.copy(
-                        isLoadingBooks = if (isInitial && !isLoadingGroupBooks) false else it.isLoadingBooks,
+                        isLoadingBooks = false,
                         isLoadingMoreSavedBooks = false
-                    ) 
-                }
-            }
-        }
-    }
-
-    fun loadGroupBooks(isInitial: Boolean = false) {
-        if (isLoadingGroupBooks) return
-        if (!isInitial && _uiState.value.isLastGroupBooks) return
-
-        viewModelScope.launch {
-            try {
-                isLoadingGroupBooks = true
-                
-                if (isInitial) {
-                    updateState { it.copy(groupBooks = emptyList(), isLastGroupBooks = false) }
-                    groupBooksCursor = null
-                } else {
-                    updateState { it.copy(isLoadingMoreGroupBooks = true) }
-                }
-
-                val cursor = if (isInitial) null else groupBooksCursor
-
-                bookRepository.getBooks("JOINING", cursor)
-                    .onSuccess { response ->
-                        if (response != null) {
-                            val currentList = if (isInitial) emptyList() else _uiState.value.groupBooks
-                            val newBooks = response.bookList.map { it.toBookData() }
-                            updateState {
-                                it.copy(
-                                    groupBooks = currentList + newBooks,
-                                    isLastGroupBooks = response.isLast
-                                )
-                            }
-                            groupBooksCursor = response.nextCursor
-                        } else {
-                            updateState { it.copy(isLastGroupBooks = true) }
-                        }
-                    }
-                    .onFailure { exception ->
-                        if (isInitial) {
-                            updateState { it.copy(groupBooks = emptyList()) }
-                        }
-                    }
-            } finally {
-                isLoadingGroupBooks = false
-                updateState { 
-                    it.copy(
-                        isLoadingBooks = if (isInitial && !isLoadingSavedBooks) false else it.isLoadingBooks,
-                        isLoadingMoreGroupBooks = false
-                    ) 
+                    )
                 }
             }
         }
@@ -195,10 +145,6 @@ class GroupMakeRoomViewModel @Inject constructor(
 
     fun loadMoreSavedBooks() {
         loadSavedBooks(isInitial = false)
-    }
-
-    fun loadMoreGroupBooks() {
-        loadGroupBooks(isInitial = false)
     }
 
     private fun BookSavedResponse.toBookData(): BookData {
@@ -224,28 +170,28 @@ class GroupMakeRoomViewModel @Inject constructor(
         loadMoreSearchJob?.cancel()
 
         if (query.isBlank()) {
-            updateState { 
+            updateState {
                 it.copy(
-                    searchResults = emptyList(), 
+                    searchResults = emptyList(),
                     isSearching = false,
                     searchPage = 1,
                     isLastSearchPage = false,
                     currentSearchQuery = ""
-                ) 
+                )
             }
             return
         }
 
         searchJob = viewModelScope.launch {
             delay(300) // 디바운싱
-            updateState { 
+            updateState {
                 it.copy(
                     isSearching = true,
                     searchResults = emptyList(),
                     searchPage = 1,
                     isLastSearchPage = false,
                     currentSearchQuery = query
-                ) 
+                )
             }
 
             try {
@@ -291,23 +237,24 @@ class GroupMakeRoomViewModel @Inject constructor(
 
     fun loadMoreSearchResults() {
         val currentState = _uiState.value
-        if (currentState.isLoadingMoreSearchResults || 
+        if (currentState.isLoadingMoreSearchResults ||
             currentState.isSearching ||
-            currentState.isLastSearchPage || 
+            currentState.isLastSearchPage ||
             currentState.searchResults.isEmpty() ||
-            currentState.currentSearchQuery.isBlank()) {
+            currentState.currentSearchQuery.isBlank()
+        ) {
             return
         }
 
         loadMoreSearchJob?.cancel()
         loadMoreSearchJob = viewModelScope.launch {
             updateState { it.copy(isLoadingMoreSearchResults = true) }
-            
+
             try {
                 val nextPage = currentState.searchPage + 1
                 val result = bookRepository.searchBooks(
                     currentState.currentSearchQuery,
-                    page = nextPage, 
+                    page = nextPage,
                     isFinalized = false
                 )
                 result.onSuccess { response ->
@@ -378,6 +325,10 @@ class GroupMakeRoomViewModel @Inject constructor(
 
     fun updatePassword(password: String) {
         updateState { it.copy(password = password) }
+    }
+
+    fun toggleConfirmDialog(show: Boolean = true) {
+        updateState { it.copy(showConfirmDialog = show) }
     }
 
     fun createGroup(onSuccess: (Int) -> Unit, onError: (String) -> Unit) {

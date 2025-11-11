@@ -28,7 +28,7 @@ fun GroupMemberLimitPicker(
     selectedCount: Int = 30,
     onCountSelected: (Int) -> Unit = { }
 ) {
-    val memberCounts = remember { (1..30).toList() }
+    val memberCounts = remember { (2..30).toList() }
 
     Column(
         modifier = modifier.fillMaxWidth()

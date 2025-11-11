@@ -28,9 +28,12 @@ class AuthInterceptor @Inject constructor(
         }.build()
 
         val response = chain.proceed(newRequest)
-        
-        // 401 응답 처리
-        if (response.code == 401) {
+
+        // 401 또는 인증 관련 500 에러 처리
+        val shouldClearAuth = response.code == 401 ||
+            (response.code == 500 && isAuthError(response))
+
+        if (shouldClearAuth) {
             runBlocking {
                 tokenManager.clearTokens()
                 authStateManager.triggerTokenExpired()
@@ -38,5 +41,15 @@ class AuthInterceptor @Inject constructor(
         }
 
         return response
+    }
+
+    private fun isAuthError(response: Response): Boolean {
+        return try {
+            val body = response.peekBody(Long.MAX_VALUE).string()
+            // 에러 코드 40108 (인증 처리 중 서버 오류) 확인
+            body.contains("40108")
+        } catch (e: Exception) {
+            false
+        }
     }
 }
