@@ -57,10 +57,10 @@ fun GroupRoomDurationPicker(
         }
     }
 
-    // 모집 기간 계산 (디바운싱은 1초로 했습니다)
+    // 모집 기간 계산
     LaunchedEffect(startDate, isPickerTouched) {
         if (isPickerTouched) {
-            delay(1000)
+            delay(100)
             debouncedRecruitmentDays = ChronoUnit.DAYS.between(today, startDate).toInt()
         }
     }
